@@ -4,6 +4,9 @@ var connect = require('connect')
     , io = require('socket.io')
     , port = (process.env.PORT || 8081);
 
+// Single variable model
+var status = "unknown";
+
 //Setup Express
 var server = express.createServer();
 server.configure(function(){
@@ -68,6 +71,17 @@ server.get('/', function(req,res){
   });
 });
 
+server.get('/status', function(req, res){
+  res.send(status);
+});
+
+server.post('/', function(req, res){
+  console.log("got POST " + req.body);
+  status = req.body
+  io.sockets.emit('server_message', req.body);
+  res.write("Done");
+  res.end();
+});
 
 //A Route for Creating a 500 Error (Useful to keep around)
 server.get('/500', function(req, res){
@@ -84,6 +98,5 @@ function NotFound(msg){
     Error.call(this, msg);
     Error.captureStackTrace(this, arguments.callee);
 }
-
 
 console.log('Listening on http://0.0.0.0:' + port );
